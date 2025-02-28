@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesaplama Aracı</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container d-flex justify-content-center mt-5">
+        <div class="card p-4 col-12 col-lg-6">
+            <h3 class="text-center">Hesaplama Aracı</h3>
+            <div class="mb-3">
+                <label class="form-label">Para Birimi:</label>
+                <select id="kur_sec" class="form-select" onchange="toggleKurInput()">
+                    <option value="1">TRY</option>
+                    <option value="usd">USD</option>
+                    <option value="eur">EUR</option>
+                </select>
+            </div>
+            <div class="mb-3" id="kur_input_container" style="display: none;">
+                <label class="form-label">Kur Değeri:</label>
+                <input type="number" id="kur" class="form-control" step="0.01" placeholder="Kur değerini girin">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tutar:</label>
+                <div class="input-group">
+                    <input type="number" id="tutar" class="form-control" step="0.01" placeholder="Tutarı girin">
+                    <span class="input-group-text" id="currency-symbol">₺</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Yüzde:</label>
+                <input type="number" id="oran" class="form-control" step="0.01" value="1.1">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Kat Sayı:</label>
+                <input type="number" id="kat_sayi" class="form-control" step="1" value="2">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">KDV Oranı:</label>
+                <select id="kdv" class="form-select">
+                    <option value="0.10">%10</option>
+                    <option value="0.20">%20</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="hesapla()">Hesapla</button>
+            <h5 class="mt-4 text-center">Tutar: <span id="sonuc1">0</span></h5>
+            <h5 class="text-center">KDV: <span id="sonuc2">0</span></h5>
+            <h5 class="text-center">KDV Dahil Tutar: <span id="sonuc3">0</span></h5>
+        </div>
+    </div>
+
+    <script>
+        function toggleKurInput() {
+            let kurSec = document.getElementById("kur_sec").value;
+            let kurInputContainer = document.getElementById("kur_input_container");
+            let kurInput = document.getElementById("kur");
+            let currencySymbol = document.getElementById("currency-symbol");
+            
+            if (kurSec === "usd") {
+                kurInputContainer.style.display = "block";
+                kurInput.value = "";
+                currencySymbol.textContent = "$";
+            } else if (kurSec === "eur") {
+                kurInputContainer.style.display = "block";
+                kurInput.value = "";
+                currencySymbol.textContent = "€";
+            } else {
+                kurInputContainer.style.display = "none";
+                kurInput.value = "1";
+                currencySymbol.textContent = "₺";
+                hesapla();
+            }
+        }
+        
+        function hesapla() {
+            let kurSec = document.getElementById("kur_sec").value;
+            let kur = kurSec === "1" ? 1 : parseFloat(document.getElementById("kur").value) || 0;
+            let tutar = parseFloat(document.getElementById("tutar").value) || 0;
+            let oran = parseFloat(document.getElementById("oran").value) || 1.1;
+            let katSayi = parseFloat(document.getElementById("kat_sayi").value) || 2;
+            let kdv = parseFloat(document.getElementById("kdv").value);
+
+            let kdvsizTutar = tutar * oran * katSayi * kur ;
+            kdvsizTutar = (kdvsizTutar.toFixed(3) % 1 === 0 ? parseInt(kdvsizTutar) : kdvsizTutar.toFixed(3));
+
+            let kdvTutari = tutar * oran * katSayi * kdv * kur ;
+            kdvTutari = (kdvTutari.toFixed(3) % 1 === 0 ? parseInt(kdvTutari) : kdvTutari.toFixed(3));
+
+            let kdvliTutar = ((tutar * oran * katSayi) + (tutar * oran * katSayi * kdv)) * kur;
+            kdvliTutar = (kdvliTutar.toFixed(3) % 1 === 0 ? parseInt(kdvliTutar) : kdvliTutar.toFixed(3));
+
+            document.getElementById("sonuc1").innerText = kdvsizTutar + '₺';
+            document.getElementById("sonuc2").innerText = kdvTutari + '₺';
+            document.getElementById("sonuc3").innerText = kdvliTutar + '₺';
+        }
+    </script>
+</body>
+</html>
